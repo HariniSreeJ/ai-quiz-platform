@@ -1,0 +1,52 @@
+.authContainer {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.authCard {
+    width: 100%;
+    max-width: 440px;
+}
+
+.authHeader {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.authHeader h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.authHeader p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.authForm {
+    display: flex;
+    flex-direction: column;
+}
+
+.errorAlert {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--error);
+    color: var(--error);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.authFooter {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}

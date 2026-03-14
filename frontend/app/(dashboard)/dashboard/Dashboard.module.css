@@ -1,0 +1,170 @@
+.dashboardContainer {
+    padding: 3rem 1.5rem;
+}
+
+.centerPage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.statCard {
+    padding: 2rem;
+    text-align: center;
+}
+
+.statCard h3 {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.statValue {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff, var(--text-muted));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.mainGrid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.topicsSection, .recentSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.topicsSection h3, .recentSection h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.topicList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.topicItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.topicHeader {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.topicName {
+    color: var(--text-primary);
+}
+
+.topicScore {
+    color: var(--text-secondary);
+}
+
+.progressBar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 1s ease-in-out;
+}
+
+.attemptList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.attemptItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+}
+
+.attemptItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-strong);
+    transform: translateX(4px);
+}
+
+.attemptInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.attemptScore {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.attemptDate {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.continueLink {
+    color: var(--accent-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .mainGrid {
+        grid-template-columns: 1fr;
+    }
+}
