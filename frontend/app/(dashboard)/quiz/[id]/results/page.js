@@ -31,7 +31,7 @@ export default function QuizResults() {
                         api.get(`/analytics/attempts/${currentAttemptId}/`),
                         api.get(`/quizzes/${quizId}/`)
                     ]);
-                    
+
                     if (!ignore) {
                         setAttempt(attemptRes.data);
                         setQuiz(quizRes.data);
@@ -43,12 +43,12 @@ export default function QuizResults() {
                         api.get('/analytics/performance/'),
                         api.get(`/quizzes/${quizId}/`)
                     ]);
-                    
+
                     if (!ignore) {
                         const stats = perfRes.data;
                         // ONLY match an attempt for the actual quiz. Do NOT fall back to recent_attempts[0] if the ID doesn't match!
                         const latest = stats?.recent_attempts?.find(a => a.quiz === parseInt(quizId));
-                        
+
                         if (latest) {
                             setAttempt(latest);
                         } else {
@@ -98,12 +98,25 @@ export default function QuizResults() {
 
     const currentAttempt = attempt;
 
+    const scorePercentage = Math.round((currentAttempt.score / currentAttempt.total_questions) * 100);
+    const isSuccess = scorePercentage >= 70;
+
     return (
         <div className={`container ${styles.resultsContainer}`}>
             <div className={`glass-card ${styles.scoreCard}`}>
                 <div className={styles.scoreHeader}>
-                    <h1 className={styles.title}>Quiz Review</h1>
+                    <h1 className={styles.title}>{isSuccess ? 'Outstanding Work! 🌟' : 'Good Effort! 📚'}</h1>
                     <p className={styles.subtitle}>You completed the quiz on <strong>{quiz.topic}</strong></p>
+                </div>
+
+                <div className={styles.circleContainer}>
+                    <div className={styles.scoreCircle} style={{
+                        borderColor: isSuccess ? 'var(--success)' : (scorePercentage > 40 ? 'var(--warning)' : 'var(--error)'),
+                        color: isSuccess ? 'var(--success)' : (scorePercentage > 40 ? 'var(--warning)' : 'var(--error)')
+                    }}>
+                        <span className={styles.scoreNumber}>{scorePercentage}%</span>
+                        <span className={styles.scoreFraction}>{currentAttempt.score}/{currentAttempt.total_questions} Correct</span>
+                    </div>
                 </div>
 
                 <div className={styles.actionGroup}>
@@ -123,9 +136,9 @@ export default function QuizResults() {
                                 <div className={styles.qHeader}>
                                     <span className={styles.qNumber}>Question {index + 1}</span>
                                 </div>
-                                
+
                                 <h3 className={styles.qText}>{q.question_text}</h3>
-                                
+
                                 <div className={styles.answerDisplay}>
                                     <div className={styles.correctAnswer}>
                                         <span className={styles.checkIcon}>✓</span>
