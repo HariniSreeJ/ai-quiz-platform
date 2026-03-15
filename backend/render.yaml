@@ -20,4 +20,4 @@ services:
         value: 4
       - key: ALLOWED_HOSTS
         value: aiquiz-backend.onrender.com
-      # You need to manually add GEMINI_API_KEY in the Render dashboard
+      # You need to manually add GROQ_API_KEY in the Render dashboard

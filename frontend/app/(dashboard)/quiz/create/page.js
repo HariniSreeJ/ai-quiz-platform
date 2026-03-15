@@ -37,7 +37,7 @@ export default function CreateQuiz() {
             <div className={styles.loadingContainer}>
                 <div className={styles.aiGlow}></div>
                 <div className="loader" style={{ width: '48px', height: '48px', borderWidth: '4px' }}></div>
-                <h2 className={styles.loadingText}>Gemini is generating your quiz...</h2>
+                <h2 className={styles.loadingText}>AI is generating your quiz...</h2>
                 <p className={styles.loadingSubtext}>Crafting questions for {topic}</p>
             </div>
         );
@@ -48,7 +48,7 @@ export default function CreateQuiz() {
             <div className={`glass-card ${styles.createCard}`}>
                 <div className={styles.header}>
                     <h1>Generate AI Quiz</h1>
-                    <p>Specify your topic and let Gemini do the rest.</p>
+                    <p>Specify your topic and let AI do the rest.</p>
                 </div>
 
                 {error && <div className={styles.errorAlert}>{error}</div>}

@@ -1,17 +1,16 @@
 import json
 import os
-from google import genai
-from google.genai import types
+from groq import Groq
+
 
 def generate_quiz_questions(topic, difficulty, num_questions):
-    """Calls Gemini to generate a JSON array of quiz questions."""
-    
-    # Check for API key; if missing, use fallback mock logic (for development/review without key)
-    api_key = os.environ.get("GEMINI_API_KEY")
+    """Calls Groq (Llama 3.3 70B) to generate a JSON array of quiz questions."""
+
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         return _generate_mock_questions(topic, difficulty, num_questions)
 
-    client = genai.Client(api_key=api_key)
+    client = Groq(api_key=api_key)
 
     prompt = f"""Generate a multiple-choice quiz about '{topic}'.
     Difficulty: {difficulty}
@@ -30,22 +29,36 @@ def generate_quiz_questions(topic, difficulty, num_questions):
     """
 
     try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a quiz generator. You ONLY output valid JSON arrays. No markdown, no extra text."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.7,
+            max_completion_tokens=4096,
         )
-        
-        # Strip potential markdown block syntax if the model decides to include it anyway
-        text = response.text.strip()
+
+        text = response.choices[0].message.content.strip()
+
+        # Strip potential markdown block syntax if the model includes it
         if text.startswith('```json'):
             text = text[7:]
+        if text.startswith('```'):
+            text = text[3:]
         if text.endswith('```'):
             text = text[:-3]
-            
+
         return json.loads(text.strip())
-        
+
     except Exception as e:
-        print(f"Error calling Gemini: {e}")
+        print(f"Error calling Groq: {e}")
         # Fallback to mock on error to ensure app still functions
         return _generate_mock_questions(topic, difficulty, num_questions)
 
@@ -60,7 +73,7 @@ def _generate_mock_questions(topic, difficulty, num_questions):
             "option_b": f"Mock Option B for Q{i}",
             "option_c": f"Mock Option C for Q{i}",
             "option_d": f"Mock Option D for Q{i}",
-            "correct_option": "A" if i % 2 != 0 else "C", # Alternate correct answers
-            "explanation": f"This is a mocked explanation for question {i}. You need to provide a GEMINI_API_KEY environment variable to use the real AI."
+            "correct_option": "A" if i % 2 != 0 else "C",
+            "explanation": f"This is a mocked explanation for question {i}. Set the GROQ_API_KEY environment variable to use real AI generation."
         })
     return questions
