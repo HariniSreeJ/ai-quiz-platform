@@ -100,7 +100,7 @@ export default function Dashboard() {
                             <h3>Recent Attempts</h3>
                             <div className={styles.attemptList}>
                                 {stats?.recent_attempts?.map((attempt, index) => (
-                                    <Link href={`/quiz/${attempt.quiz}/results`} key={index} className={styles.attemptItem}>
+                                    <Link href={`/quiz/${attempt.quiz}/results?attempt=${attempt.id}`} key={index} className={styles.attemptItem}>
                                         <div className={styles.attemptInfo}>
                                             <span className={styles.attemptScore}>{attempt.score}/{attempt.total_questions}</span>
                                             <span className={styles.attemptDate}>
