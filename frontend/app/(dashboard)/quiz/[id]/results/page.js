@@ -13,22 +13,49 @@ export default function QuizResults() {
     const attemptId = searchParams.get('attempt');
     const quizId = params.id;
 
-    const [stats, setStats] = useState(null);
+    const [attempt, setAttempt] = useState(null);
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (quizId) fetchResults();
+        if (quizId && attemptId) {
+            fetchResults();
+        } else if (quizId) {
+            // Fallback for direct navigation without attempt ID
+            fetchLatestAttempt();
+        }
     }, [quizId, attemptId]);
 
     const fetchResults = async () => {
+        try {
+            const [attemptRes, quizRes] = await Promise.all([
+                api.get(`/analytics/attempts/${attemptId}/`),
+                api.get(`/quizzes/${quizId}/`)
+            ]);
+            
+            setAttempt(attemptRes.data);
+            setQuiz(quizRes.data);
+            setLoading(false);
+        } catch (error) {
+            console.error('Failed to fetch specific attempt', error);
+            // Fallback to performance stats logic if the specific attempt fetch fails
+            fetchLatestAttempt();
+        }
+    };
+
+    const fetchLatestAttempt = async () => {
         try {
             const [perfRes, quizRes] = await Promise.all([
                 api.get('/analytics/performance/'),
                 api.get(`/quizzes/${quizId}/`)
             ]);
             
-            setStats(perfRes.data);
+            const stats = perfRes.data;
+            const latest = stats?.recent_attempts?.find(a => a.quiz === parseInt(quizId)) || stats?.recent_attempts?.[0];
+            
+            if (latest) {
+                setAttempt(latest);
+            }
             setQuiz(quizRes.data);
             setLoading(false);
         } catch (error) {
@@ -39,10 +66,9 @@ export default function QuizResults() {
 
     if (loading) return <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}><span className="loader"></span></div>;
 
-    // Find the current attempt from recent attempts
-    const currentAttempt = stats?.recent_attempts?.find(a => a.id === parseInt(attemptId)) || stats?.recent_attempts?.[0];
+    if (!attempt || !quiz) return <div className="container">Error loading attempt details.</div>;
 
-    if (!currentAttempt || !quiz) return <div className="container">Error loading attempt details.</div>;
+    const currentAttempt = attempt;
 
     const scorePercentage = Math.round((currentAttempt.score / currentAttempt.total_questions) * 100);
     const isSuccess = scorePercentage >= 70;

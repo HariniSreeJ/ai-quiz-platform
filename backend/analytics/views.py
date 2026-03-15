@@ -46,3 +46,10 @@ class UserPerformanceView(APIView):
             "topic_stats": topics,
             "recent_attempts": QuizAttemptSerializer(attempts.order_by('-attempt_timestamp')[:5], many=True).data
         })
+
+class QuizAttemptDetailView(generics.RetrieveAPIView):
+    serializer_class = QuizAttemptSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return QuizAttempt.objects.filter(user=self.request.user)
