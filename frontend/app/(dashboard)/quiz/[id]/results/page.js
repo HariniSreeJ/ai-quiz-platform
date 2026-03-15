@@ -38,7 +38,7 @@ export default function QuizResults() {
                         setLoading(false);
                     }
                 } else if (quizId) {
-                    // Fallback to latest attempt
+                    // Fallback to latest attempt for this specific quiz only!
                     const [perfRes, quizRes] = await Promise.all([
                         api.get('/analytics/performance/'),
                         api.get(`/quizzes/${quizId}/`)
@@ -46,8 +46,16 @@ export default function QuizResults() {
                     
                     if (!ignore) {
                         const stats = perfRes.data;
-                        const latest = stats?.recent_attempts?.find(a => a.quiz === parseInt(quizId)) || stats?.recent_attempts?.[0];
-                        if (latest) setAttempt(latest);
+                        // ONLY match an attempt for the actual quiz. Do NOT fall back to recent_attempts[0] if the ID doesn't match!
+                        const latest = stats?.recent_attempts?.find(a => a.quiz === parseInt(quizId));
+                        
+                        if (latest) {
+                            setAttempt(latest);
+                        } else {
+                            // If they have no attempt in the top 5 for this specific quiz, we can't show a score accurately.
+                            // We shouldn't borrow a score from another quiz. 
+                            setAttempt("not_found");
+                        }
                         setQuiz(quizRes.data);
                         setLoading(false);
                     }
@@ -70,6 +78,23 @@ export default function QuizResults() {
     if (loading) return <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}><span className="loader"></span></div>;
 
     if (!attempt || !quiz) return <div className="container">Error loading attempt details.</div>;
+
+    if (attempt === "not_found") {
+        return (
+            <div className={`container ${styles.resultsContainer}`}>
+                <div className={`glass-card ${styles.scoreCard}`}>
+                    <div className={styles.scoreHeader}>
+                        <h1 className={styles.title}>No Recent Attempt Found</h1>
+                        <p className={styles.subtitle}>We couldn't find a recent attempt for <strong>{quiz.topic}</strong> in your top 5 dashboard history.</p>
+                    </div>
+                    <div className={styles.actionGroup}>
+                        <Link href="/dashboard" className="btn-secondary">Back to Dashboard</Link>
+                        <Link href={`/quiz/${quiz.id}`} className="btn-primary">Take Quiz Now</Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     const currentAttempt = attempt;
 
