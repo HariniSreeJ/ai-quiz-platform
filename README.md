@@ -1,105 +1,290 @@
-# AuraQuiz — AI-Powered Quiz Platform
+# AuraQuiz — AI Powered Quiz Platform
 
-An intelligent full-stack quiz application that dynamically generates quizzes on any topic using **Google Gemini AI**, allowing users to track their learning progress through detailed analytics and AI-powered explanations.
+AuraQuiz is a full-stack AI-powered quiz platform where users can generate quizzes on any topic, take them interactively, and track their performance through analytics.
 
-## Tech Stack
+The application is built using **Next.js for the frontend**, **Django REST Framework for the backend**, and **PostgreSQL for the database**. AI is used to dynamically generate quiz questions.
+
+---
+
+# Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 15 (App Router), React, CSS Modules |
-| Backend | Django 5, Django REST Framework, SimpleJWT |
-| Database | SQLite (dev) / PostgreSQL (prod) |
-| AI | Google Gemini 2.5 Flash |
+|------|-------------|
+| Frontend | Next.js 15, React |
+| Backend | Django 5, Django REST Framework |
+| Authentication | JWT (SimpleJWT) |
+| Database | PostgreSQL (production), SQLite (development) |
+| AI | Groq API – Llama 3.3 |
+| Deployment | Render (backend), Vercel (frontend) |
 
-## Features
+---
 
-- ✅ JWT Authentication (Register, Login, Profile)
-- ✅ Dynamic AI Quiz Generation on any topic
-- ✅ Real-time quiz taking with progress tracking
-- ✅ Score & results dashboard with AI-generated explanations
-- ✅ Topic-wise performance analytics
-- ✅ Premium glassmorphic dark UI with micro-animations
-- ✅ Responsive design
+# System Architecture
+```mermaid
+graph LR
+    subgraph Frontend["Frontend (Next.js 15)"]
+        A[Landing Page] --> B[Auth Pages]
+        B --> C[Dashboard]
+        C --> D[Create Quiz]
+        D --> E[Active Quiz]
+        E --> F[Results + AI Explanations]
+    end
 
-## Project Structure
+    subgraph Backend["Backend (Django 5 + DRF)"]
+        G[users app] --- H[quizzes app]
+        H --- I[analytics app]
+        H --- J[ai_service.py]
+    end
 
-```
-ai_quiz_platform/
-├── backend/           # Django REST API
-│   ├── config/        # Django settings & URLs
-│   ├── users/         # Custom User model & JWT auth
-│   ├── quizzes/       # Quiz, Question models & AI service
-│   ├── analytics/     # Attempt submission & performance stats
-│   ├── build.sh       # Render deployment script
-│   └── render.yaml    # Render Blueprint IaC
-├── frontend/          # Next.js application
-│   ├── app/           # App Router pages
-│   ├── context/       # AuthContext (JWT state)
-│   ├── lib/           # Axios API client
-│   └── components/    # Navbar & reusable UI
-└── .gitignore
+    Frontend -- "Axios + JWT" --> Backend
+    J -- "Groq API" --> K["Llama 3.3 70B"]
 ```
 
-## Quick Start
+---
 
-### Backend
+# Core Features
 
-```bash
+### User Authentication
+
+- User registration
+- Secure login
+- JWT-based authentication
+- Session persistence
+
+---
+
+### AI Quiz Generation
+
+Users can create quizzes by specifying:
+
+- Topic
+- Difficulty level
+- Number of questions (5-20)
+
+The backend sends a prompt to the AI model which generates multiple-choice questions.
+
+---
+
+### Quiz Attempt
+
+Users take quizzes interactively:
+
+- One question at a time
+- Progress tracking
+- Option selection
+- Quiz navigation
+
+---
+
+### Results and Review
+
+After completing a quiz, users can:
+
+- View their score
+- Review answers
+- See AI-generated explanations
+
+---
+
+### Analytics Dashboard
+
+The system tracks:
+
+- Total quizzes attempted
+- Accuracy percentage
+- Topic-wise performance
+- Recent quiz attempts
+
+---
+
+# Database Design
+
+The system uses relational models designed for tracking quizzes and attempts.
+
+Main entities:
+
+| Model | Purpose |
+|------|--------|
+User | Stores user accounts |
+Quiz | Stores quiz metadata |
+Question | Stores quiz questions |
+QuizAttempt | Tracks each attempt |
+UserAnswer | Stores selected answers |
+
+Relationships:
+
+- A **User** can create multiple quizzes
+- A **Quiz** contains multiple questions
+- A **User** can attempt multiple quizzes
+- Each **QuizAttempt** stores user answers
+
+---
+
+# API Structure
+
+### Authentication
+POST /api/users/register/
+
+POST /api/users/login/
+
+POST /api/users/token/refresh/
+
+GET /api/users/me/
+
+
+### Quiz
+
+
+POST /api/quizzes/
+
+GET /api/quizzes/
+
+GET /api/quizzes/:id/
+
+
+### Analytics
+
+
+POST /api/analytics/submit/
+
+GET /api/analytics/performance/
+
+GET /api/analytics/attempts/:id/
+
+
+---
+
+# Installation
+
+## Clone Repository
+
+
+git clone https://github.com/HariniSreeJ/ai-quiz-platform.git
+
+cd ai-quiz-platform
+
+
+---
+
+# Backend Setup
+
+
 cd backend
+
 python -m venv venv
-.\venv\Scripts\activate        # Windows
+
+venv\Scripts\activate
+
 pip install -r requirements.txt
-```
 
-Set your Gemini API key:
-```bash
-$env:GEMINI_API_KEY="your_key_here"   # PowerShell
-```
 
-Run migrations and start the server:
-```bash
+Create `.env` file:
+
+GROQ_API_KEY=your_api_key
+
+
+Run migrations:
+
+
 python manage.py migrate
-python manage.py runserver 8000
-```
 
-### Frontend
 
-```bash
+Start server:
+
+
+python manage.py runserver
+
+
+---
+
+# Frontend Setup
+
+
 cd frontend
 npm install
+
+
+Create `.env.local`:
+
+
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+
+
+Start frontend:
+
+
 npm run dev
-```
 
-Visit **http://localhost:3000**
 
-## API Endpoints
+---
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/users/register/` | Register new user |
-| POST | `/api/users/login/` | Get JWT tokens |
-| GET | `/api/users/me/` | Get current user profile |
-| GET/POST | `/api/quizzes/` | List quizzes / Create AI quiz |
-| GET | `/api/quizzes/:id/` | Get quiz with questions |
-| POST | `/api/analytics/submit/` | Submit quiz attempt |
-| GET | `/api/analytics/performance/` | Get user analytics |
+## Live Deployment
 
-## Deployment
+The application is deployed and accessible through the following links:
 
-### Backend → Render
-1. Push to GitHub
-2. Render → New Blueprint → select this repo
-3. Add `GEMINI_API_KEY` in Render dashboard
+| Service | URL |
+|--------|------|
+| Frontend (Vercel) | https://ai-quiz-platform-ecru.vercel.app/ |
+| Backend API (Render) | https://ai-quiz-platform-3cwj.onrender.com/ |
 
-### Frontend → Vercel
-1. Vercel → New Project → Import repo
-2. Root Directory: `frontend`
-3. Add env var: `NEXT_PUBLIC_API_URL` = `https://your-backend.onrender.com/api`
+Environment variables are configured on the hosting platforms.
 
-## Architecture Decisions
+---
 
-- **Modular Monolith**: Django project split into `users`, `quizzes`, `analytics` apps
-- **JWT Auth**: Stateless API authentication via SimpleJWT
-- **AI Fallback**: Mock question generator when Gemini API is unavailable
-- **CSS Modules**: Premium styling without framework dependencies
-- **React Context**: Global auth state management via `AuthContext`
+# Challenges Faced
+
+### AI Output Formatting
+
+AI responses sometimes included markdown formatting or invalid JSON.
+
+**Solution**
+
+Implemented preprocessing to clean responses and ensure valid JSON parsing.
+
+---
+
+### Token Expiration
+
+JWT tokens expire which could interrupt user sessions.
+
+**Solution**
+
+Implemented automatic token refresh using Axios interceptors.
+
+---
+
+### Preventing Client-Side Manipulation
+
+Calculating scores on the client could allow cheating.
+
+**Solution**
+
+All grading logic is implemented on the backend.
+
+---
+
+# Features Implemented
+
+- User authentication
+- AI quiz generation
+- Interactive quiz interface
+- Result review with explanations
+- Analytics dashboard
+- Quiz history
+
+---
+
+# Future Improvements
+
+- AI-based study recommendations
+- Leaderboards
+- Microservices based architecture
+- Async AI generation with Celery
+- Redis caching
+
+---
+
+# Author
+
+Harini Sree J  
+GitHub: https://github.com/HariniSreeJ
