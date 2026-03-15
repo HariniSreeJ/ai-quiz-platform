@@ -18,51 +18,54 @@ export default function QuizResults() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (quizId && attemptId) {
-            fetchResults();
-        } else if (quizId) {
-            // Fallback for direct navigation without attempt ID
-            fetchLatestAttempt();
-        }
-    }, [quizId, attemptId]);
+        let ignore = false;
 
-    const fetchResults = async () => {
-        try {
-            const [attemptRes, quizRes] = await Promise.all([
-                api.get(`/analytics/attempts/${attemptId}/`),
-                api.get(`/quizzes/${quizId}/`)
-            ]);
-            
-            setAttempt(attemptRes.data);
-            setQuiz(quizRes.data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Failed to fetch specific attempt', error);
-            // Fallback to performance stats logic if the specific attempt fetch fails
-            fetchLatestAttempt();
-        }
-    };
+        const loadResults = async () => {
+            // Next.js useSearchParams can be null during the first hydration tick. 
+            // We read directly from window.location as a fallback to prevent race conditions.
+            const currentAttemptId = attemptId || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('attempt') : null);
 
-    const fetchLatestAttempt = async () => {
-        try {
-            const [perfRes, quizRes] = await Promise.all([
-                api.get('/analytics/performance/'),
-                api.get(`/quizzes/${quizId}/`)
-            ]);
-            
-            const stats = perfRes.data;
-            const latest = stats?.recent_attempts?.find(a => a.quiz === parseInt(quizId)) || stats?.recent_attempts?.[0];
-            
-            if (latest) {
-                setAttempt(latest);
+            try {
+                if (quizId && currentAttemptId) {
+                    const [attemptRes, quizRes] = await Promise.all([
+                        api.get(`/analytics/attempts/${currentAttemptId}/`),
+                        api.get(`/quizzes/${quizId}/`)
+                    ]);
+                    
+                    if (!ignore) {
+                        setAttempt(attemptRes.data);
+                        setQuiz(quizRes.data);
+                        setLoading(false);
+                    }
+                } else if (quizId) {
+                    // Fallback to latest attempt
+                    const [perfRes, quizRes] = await Promise.all([
+                        api.get('/analytics/performance/'),
+                        api.get(`/quizzes/${quizId}/`)
+                    ]);
+                    
+                    if (!ignore) {
+                        const stats = perfRes.data;
+                        const latest = stats?.recent_attempts?.find(a => a.quiz === parseInt(quizId)) || stats?.recent_attempts?.[0];
+                        if (latest) setAttempt(latest);
+                        setQuiz(quizRes.data);
+                        setLoading(false);
+                    }
+                }
+            } catch (error) {
+                if (!ignore) {
+                    console.error('Failed to load results', error);
+                    router.push('/dashboard');
+                }
             }
-            setQuiz(quizRes.data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Failed to fetch results', error);
-            router.push('/dashboard');
-        }
-    };
+        };
+
+        loadResults();
+
+        return () => {
+            ignore = true; // Cleanup to prevent race condition overwrites
+        };
+    }, [quizId, attemptId]);
 
     if (loading) return <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}><span className="loader"></span></div>;
 
